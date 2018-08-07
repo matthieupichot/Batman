@@ -2,7 +2,6 @@ package fr.afcepf.ai103.data;
 
 import java.io.Serializable;
 import javax.persistence.*;
-import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
 
@@ -28,21 +27,30 @@ public class Stock implements Serializable {
 
 	private int duree_ext_stock;
 
-	private BigDecimal prix;
+	private double prix;
 
-	private BigDecimal qte_initiale;
+	private double qte_initiale;
+
+	//bi-directional many-to-one association to Annonce
+	@OneToMany(mappedBy="stock")
+	private List<Annonce> annonces;
 
 	//bi-directional many-to-one association to Consommation
 	@OneToMany(mappedBy="stock")
 	private List<Consommation> consommations;
 
+	//bi-directional many-to-one association to Conservation
+	@ManyToOne(fetch=FetchType.LAZY)
+	@JoinColumn(name="Id_conserv")
+	private Conservation conservation;
+
 	//bi-directional many-to-one association to Produit
-	@ManyToOne
+	@ManyToOne(fetch=FetchType.LAZY)
 	@JoinColumn(name="Id_prod")
 	private Produit produit;
 
 	//bi-directional many-to-one association to Utilisateur
-	@ManyToOne
+	@ManyToOne(fetch=FetchType.LAZY)
 	@JoinColumn(name="Id_user")
 	private Utilisateur utilisateur;
 
@@ -81,20 +89,42 @@ public class Stock implements Serializable {
 		this.duree_ext_stock = duree_ext_stock;
 	}
 
-	public BigDecimal getPrix() {
+	public double getPrix() {
 		return this.prix;
 	}
 
-	public void setPrix(BigDecimal prix) {
+	public void setPrix(double prix) {
 		this.prix = prix;
 	}
 
-	public BigDecimal getQte_initiale() {
+	public double getQte_initiale() {
 		return this.qte_initiale;
 	}
 
-	public void setQte_initiale(BigDecimal qte_initiale) {
+	public void setQte_initiale(double qte_initiale) {
 		this.qte_initiale = qte_initiale;
+	}
+
+	public List<Annonce> getAnnonces() {
+		return this.annonces;
+	}
+
+	public void setAnnonces(List<Annonce> annonces) {
+		this.annonces = annonces;
+	}
+
+	public Annonce addAnnonce(Annonce annonce) {
+		getAnnonces().add(annonce);
+		annonce.setStock(this);
+
+		return annonce;
+	}
+
+	public Annonce removeAnnonce(Annonce annonce) {
+		getAnnonces().remove(annonce);
+		annonce.setStock(null);
+
+		return annonce;
 	}
 
 	public List<Consommation> getConsommations() {
@@ -117,6 +147,14 @@ public class Stock implements Serializable {
 		consommation.setStock(null);
 
 		return consommation;
+	}
+
+	public Conservation getConservation() {
+		return this.conservation;
+	}
+
+	public void setConservation(Conservation conservation) {
+		this.conservation = conservation;
 	}
 
 	public Produit getProduit() {
